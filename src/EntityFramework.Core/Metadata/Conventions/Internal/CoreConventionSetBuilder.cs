@@ -16,6 +16,10 @@ namespace Microsoft.Data.Entity.Metadata.Conventions.Internal
             conventionSet.PropertyAddedConventions.Add(new ConcurrencyCheckAttributeConvention());
             conventionSet.PropertyAddedConventions.Add(new DatabaseGeneratedAttributeConvention());
             conventionSet.PropertyAddedConventions.Add(new RequiredAttributeConvention());
+            conventionSet.PropertyAddedConventions.Add(new NotMappedAttributeConvention());
+            conventionSet.PropertyAddedConventions.Add(new MaxLengthAttributeConvention());
+            conventionSet.PropertyAddedConventions.Add(new StringLengthAttributeConvention());
+            conventionSet.PropertyAddedConventions.Add(new TimestampAttributeConvention());
 
             var keyAttributeConvention = new KeyAttributeConvention();
             conventionSet.PropertyAddedConventions.Add(keyAttributeConvention);
