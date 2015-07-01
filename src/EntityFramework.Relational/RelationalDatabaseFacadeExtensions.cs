@@ -20,6 +20,16 @@ namespace Microsoft.Data.Entity
         public static void ApplyMigrations([NotNull] this DatabaseFacade databaseFacade)
             => Check.NotNull(databaseFacade, nameof(databaseFacade)).GetService<IMigrator>().ApplyMigrations();
 
+        public static void ExecuteStoreSql(
+            [NotNull] this DatabaseFacade databaseFacade,
+            [NotNull] string sql,
+            [NotNull] params object[] parameters)
+            => Check.NotNull(databaseFacade, nameof(databaseFacade))
+                .GetService<RelationalStoreSqlExecutor>()
+                    .ExecuteStoreSql(
+                        sql,
+                        parameters);
+
         public static DbConnection GetDbConnection([NotNull] this DatabaseFacade databaseFacade)
             => GetRelationalConnection(databaseFacade).DbConnection;
 
