@@ -1,0 +1,7 @@
+﻿{
+  "benchmarks": {
+    "runIterations": true,
+    "resultDatabase": "Server=(localdb)\\mssqllocaldb;Database=Benchmarks;Trusted_Connection=True;",
+    "sqlServer": "(localdb)\\mssqllocaldb"
+  }
+}

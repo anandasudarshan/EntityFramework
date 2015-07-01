@@ -11,95 +11,66 @@ namespace EntityFramework.Microbenchmarks.Query
 {
     public class FuncletizationTests
     {
-        private static readonly string _connectionString 
-            = $@"Server={TestConfig.Instance.DataSource};Database=Perf_Query_Funcletization;Integrated Security=True;MultipleActiveResultSets=true;";
+        private static readonly string _connectionString
+            = $@"Server={BenchmarkConfig.Instance.SqlServer};Database=Perf_Query_Funcletization;Integrated Security=True;MultipleActiveResultSets=true;";
 
         private static readonly int _funcletizationIterationCount = 100;
 
-        [Fact]
-        public void NewQueryInstance()
+        [Benchmark(Iterations = 50, WarmupIterations = 5)]
+        public void NewQueryInstance(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Funcletization_NewQueryInstance",
-                    IterationCount = 50,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                using (harness.StartCollection())
-                                {
-                                    var val = 11;
-                                    for (var i = 0; i < _funcletizationIterationCount; i++)
-                                    {
-                                        var result = context.Products.Where(p => p.ProductId < val).ToList();
 
-                                        Assert.Equal(10, result.Count);
-                                    }
-                                }
-                            }
-                        }
-                }.RunTest();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                using (collector.StartCollection())
+                {
+                    var val = 11;
+                    for (var i = 0; i < _funcletizationIterationCount; i++)
+                    {
+                        var result = context.Products.Where(p => p.ProductId < val).ToList();
+
+                        Assert.Equal(10, result.Count);
+                    }
+                }
+            }
         }
 
-        [Fact]
-        public void SameQueryInstance()
+        [Benchmark(Iterations = 50, WarmupIterations = 5)]
+        public void SameQueryInstance(MetricCollector collector)
         {
-            new TestDefinition
+            using (var context = new OrdersContext(_connectionString))
+            {
+                using (collector.StartCollection())
                 {
-                    TestName = "Query_Funcletization_SameQueryInstance",
-                    IterationCount = 50,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                using (harness.StartCollection())
-                                {
-                                    var val = 11;
-                                    var query = context.Products.Where(p => p.ProductId < val);
+                    var val = 11;
+                    var query = context.Products.Where(p => p.ProductId < val);
 
-                                    for (var i = 0; i < _funcletizationIterationCount; i++)
-                                    {
-                                        var result = query.ToList();
+                    for (var i = 0; i < _funcletizationIterationCount; i++)
+                    {
+                        var result = query.ToList();
 
-                                        Assert.Equal(10, result.Count);
-                                    }
-                                }
-                            }
-                        }
-                }.RunTest();
+                        Assert.Equal(10, result.Count);
+                    }
+                }
+            }
         }
 
-        [Fact]
-        public void ValueFromObject()
+        [Benchmark(Iterations = 50, WarmupIterations = 5)]
+        public void ValueFromObject(MetricCollector collector)
         {
-            new TestDefinition
+            using (var context = new OrdersContext(_connectionString))
+            {
+                using (collector.StartCollection())
                 {
-                    TestName = "Query_Funcletization_ValueFromObject",
-                    IterationCount = 50,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                using (harness.StartCollection())
-                                {
-                                    var valueHolder = new ValueHolder();
-                                    for (var i = 0; i < _funcletizationIterationCount; i++)
-                                    {
-                                        var result = context.Products.Where(p => p.ProductId < valueHolder.SecondLevelProperty).ToList();
+                    var valueHolder = new ValueHolder();
+                    for (var i = 0; i < _funcletizationIterationCount; i++)
+                    {
+                        var result = context.Products.Where(p => p.ProductId < valueHolder.SecondLevelProperty).ToList();
 
-                                        Assert.Equal(10, result.Count);
-                                    }
-                                }
-                            }
-                        }
-                }.RunTest();
+                        Assert.Equal(10, result.Count);
+                    }
+                }
+            }
         }
 
         public class ValueHolder

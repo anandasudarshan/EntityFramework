@@ -14,35 +14,17 @@ namespace EntityFramework.Microbenchmarks.UpdatePipeline
     public class SimpleUpdatePipelineTests
     {
         private static readonly string _connectionString 
-            = $@"Server={TestConfig.Instance.DataSource};Database=Perf_UpdatePipeline_Simple;Integrated Security=True;MultipleActiveResultSets=true;";
+            = $@"Server={BenchmarkConfig.Instance.SqlServer};Database=Perf_UpdatePipeline_Simple;Integrated Security=True;MultipleActiveResultSets=true;";
 
-        [Fact]
-        public void Insert()
+        public SimpleUpdatePipelineTests()
         {
-            new TestDefinition
-                {
-                    TestName = "UpdatePipeline_Simple_Insert",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Run = harness => Insert(harness, false),
-                    Setup = EnsureDatabaseSetup
-                }.RunTest();
+            EnsureDatabaseSetup();
         }
 
-        [Fact]
-        public void Insert_WithoutBatching()
-        {
-            new TestDefinition
-                {
-                    TestName = "UpdatePipeline_Simple_Insert_WithoutBatching",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Run = harness => Insert(harness, true),
-                    Setup = EnsureDatabaseSetup
-                }.RunTest();
-        }
-
-        private static void Insert(TestHarness harness, bool disableBatching)
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        [BenchmarkVariation("Batching Off", false)]
+        [BenchmarkVariation("Batching On", true)]
+        public void Insert(MetricCollector collector, bool disableBatching)
         {
             using (var context = new OrdersContext(_connectionString, disableBatching))
             {
@@ -53,42 +35,28 @@ namespace EntityFramework.Microbenchmarks.UpdatePipeline
                         context.Customers.Add(new Customer { Name = "New Customer " + i });
                     }
 
-                    harness.StartCollection();
+                    collector.StartCollection();
                     var records = context.SaveChanges();
-                    harness.StopCollection();
+                    collector.StopCollection();
 
                     Assert.Equal(1000, records);
                 }
             }
         }
 
-        [Fact]
-        public void Update()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void Update(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "UpdatePipeline_Simple_Update",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Run = harness => Insert(harness, false),
-                    Setup = EnsureDatabaseSetup
-                }.RunTest();
+            Insert(collector, false);
         }
 
-        [Fact]
-        public void Update_WithoutBatching()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void Update_WithoutBatching(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "UpdatePipeline_Simple_Update_WithoutBatching",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Run = harness => Insert(harness, true),
-                    Setup = EnsureDatabaseSetup
-                }.RunTest();
+            Insert(collector, true);
         }
 
-        private static void Update(TestHarness harness, bool disableBatching)
+        private static void Update(MetricCollector collector, bool disableBatching)
         {
             using (var context = new OrdersContext(_connectionString, disableBatching))
             {
@@ -99,42 +67,28 @@ namespace EntityFramework.Microbenchmarks.UpdatePipeline
                         customer.Name += " Modified";
                     }
 
-                    harness.StartCollection();
+                    collector.StartCollection();
                     var records = context.SaveChanges();
-                    harness.StopCollection();
+                    collector.StopCollection();
 
                     Assert.Equal(1000, records);
                 }
             }
         }
 
-        [Fact]
-        public void Delete()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void Delete(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "UpdatePipeline_Simple_Delete",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Run = harness => Insert(harness, false),
-                    Setup = EnsureDatabaseSetup
-                }.RunTest();
+            Insert(collector, false);
         }
 
-        [Fact]
-        public void Delete_WithoutBatching()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void Delete_WithoutBatching(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "UpdatePipeline_Simple_Delete_WithoutBatching",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Run = harness => Insert(harness, true),
-                    Setup = EnsureDatabaseSetup
-                }.RunTest();
+            Insert(collector, true);
         }
 
-        private static void Delete(TestHarness harness, bool disableBatching)
+        private static void Delete(MetricCollector collector, bool disableBatching)
         {
             using (var context = new OrdersContext(_connectionString, disableBatching))
             {
@@ -145,42 +99,28 @@ namespace EntityFramework.Microbenchmarks.UpdatePipeline
                         context.Customers.Remove(customer);
                     }
 
-                    harness.StartCollection();
+                    collector.StartCollection();
                     var records = context.SaveChanges();
-                    harness.StopCollection();
+                    collector.StopCollection();
 
                     Assert.Equal(1000, records);
                 }
             }
         }
 
-        [Fact]
-        public void Mixed()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void Mixed(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "UpdatePipeline_Simple_Mixed",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Run = harness => Insert(harness, false),
-                    Setup = EnsureDatabaseSetup
-                }.RunTest();
+            Insert(collector, false);
         }
 
-        [Fact]
-        public void Mixed_WithoutBatching()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void Mixed_WithoutBatching(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "UpdatePipeline_Simple__WithoutBatching",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Run = harness => Insert(harness, true),
-                    Setup = EnsureDatabaseSetup
-                }.RunTest();
+            Insert(collector, true);
         }
 
-        private static void Mixed(TestHarness harness, bool disableBatching)
+        private static void Mixed(MetricCollector collector, bool disableBatching)
         {
             using (var context = new OrdersContext(_connectionString, disableBatching))
             {
@@ -203,9 +143,9 @@ namespace EntityFramework.Microbenchmarks.UpdatePipeline
                         customers[i].Name += " Modified";
                     }
 
-                    harness.StartCollection();
+                    collector.StartCollection();
                     var records = context.SaveChanges();
-                    harness.StopCollection();
+                    collector.StopCollection();
 
                     Assert.Equal(1000, records);
                 }

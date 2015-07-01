@@ -12,249 +12,148 @@ namespace EntityFramework.Microbenchmarks.Query
 {
     public class SimpleQueryTests
     {
-        private static readonly string _connectionString 
-            = $@"Server={TestConfig.Instance.DataSource};Database=Perf_Query_Simple;Integrated Security=True;MultipleActiveResultSets=true;";
+        private static readonly string _connectionString
+            = $@"Server={BenchmarkConfig.Instance.SqlServer};Database=Perf_Query_Simple;Integrated Security=True;MultipleActiveResultSets=true;";
 
-        [Fact]
-        public void LoadAll()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void LoadAll(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Simple_LoadAll",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                harness.StartCollection();
-                                var result = context.Products.ToList();
-                                harness.StopCollection();
-                                Assert.Equal(1000, result.Count);
-                            }
-                        }
-                }.RunTest();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                collector.StartCollection();
+                var result = context.Products.ToList();
+                collector.StopCollection();
+                Assert.Equal(1000, result.Count);
+            }
         }
 
-        [Fact]
-        public void Where()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void Where(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Simple_Where",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                harness.StartCollection();
-                                var result = context.Products.Where(p => p.Retail < 15).ToList();
-                                harness.StopCollection();
-                                Assert.Equal(500, result.Count);
-                            }
-                        }
-                }.RunTest();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                collector.StartCollection();
+                var result = context.Products.Where(p => p.Retail < 15).ToList();
+                collector.StopCollection();
+                Assert.Equal(500, result.Count);
+            }
         }
 
-        [Fact]
-        public void OrderBy()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void OrderBy(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Simple_OrderBy",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                harness.StartCollection();
-                                var result = context.Products.OrderBy(p => p.Retail).ToList();
-                                harness.StopCollection();
-                                Assert.Equal(1000, result.Count);
-                            }
-                        }
-                }.RunTest();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                collector.StartCollection();
+                var result = context.Products.OrderBy(p => p.Retail).ToList();
+                collector.StopCollection();
+                Assert.Equal(1000, result.Count);
+            }
         }
 
-        [Fact]
-        public void Count()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void Count(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Simple_Count",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                harness.StartCollection();
-                                var result = context.Products.Count();
-                                harness.StopCollection();
-                                Assert.Equal(1000, result);
-                            }
-                        }
-                }.RunTest();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                collector.StartCollection();
+                var result = context.Products.Count();
+                collector.StopCollection();
+                Assert.Equal(1000, result);
+            }
         }
 
-        [Fact]
-        public void SkipTake()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void SkipTake(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Simple_SkipTake",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                harness.StartCollection();
-                                var result = context.Products
-                                    .OrderBy(p => p.ProductId)
-                                    .Skip(500).Take(500)
-                                    .ToList();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                collector.StartCollection();
+                var result = context.Products
+                    .OrderBy(p => p.ProductId)
+                    .Skip(500).Take(500)
+                    .ToList();
 
-                                harness.StopCollection();
-                                Assert.Equal(500, result.Count);
-                            }
-                        }
-                }.RunTest();
+                collector.StopCollection();
+                Assert.Equal(500, result.Count);
+            }
         }
 
-        [Fact]
-        public void GroupBy()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void GroupBy(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Simple_GroupBy",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                harness.StartCollection();
-                                var result = context.Products
-                                    .GroupBy(p => p.Retail)
-                                    .Select(g => new
-                                        {
-                                            Retail = g.Key,
-                                            Products = g
-                                        })
-                                    .ToList();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                collector.StartCollection();
+                var result = context.Products
+                    .GroupBy(p => p.Retail)
+                    .Select(g => new
+                    {
+                        Retail = g.Key,
+                        Products = g
+                    })
+                    .ToList();
 
-                                harness.StopCollection();
-                                Assert.Equal(10, result.Count);
-                                Assert.All(result, g => Assert.Equal(100, g.Products.Count()));
-                            }
-                        }
-                }.RunTest();
+                collector.StopCollection();
+                Assert.Equal(10, result.Count);
+                Assert.All(result, g => Assert.Equal(100, g.Products.Count()));
+            }
         }
 
-        [Fact]
-        public void Include()
+        [Benchmark(Iterations = 2, WarmupIterations = 1)]
+        public void Include(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Simple_Include",
-                    // TODO Increase iteration count once perf issues addressed
-                    IterationCount = 2,
-                    WarmupCount = 1,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                harness.StartCollection();
-                                var result = context.Customers.Include(c => c.Orders).ToList();
-                                harness.StopCollection();
-                                Assert.Equal(1000, result.Count);
-                                Assert.Equal(2000, result.SelectMany(c => c.Orders).Count());
-                            }
-                        }
-                }.RunTest();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                collector.StartCollection();
+                var result = context.Customers.Include(c => c.Orders).ToList();
+                collector.StopCollection();
+                Assert.Equal(1000, result.Count);
+                Assert.Equal(2000, result.SelectMany(c => c.Orders).Count());
+            }
         }
 
-        [Fact]
-        public void Projection()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void Projection(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Simple_Projection",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                harness.StartCollection();
-                                var result = context.Products.Select(p => new { p.Name, p.Retail }).ToList();
-                                harness.StopCollection();
-                                Assert.Equal(1000, result.Count);
-                            }
-                        }
-                }.RunTest();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                collector.StartCollection();
+                var result = context.Products.Select(p => new { p.Name, p.Retail }).ToList();
+                collector.StopCollection();
+                Assert.Equal(1000, result.Count);
+            }
         }
 
-        [Fact]
-        public void ProjectionAcrossNavigation()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void ProjectionAcrossNavigation(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Simple_ProjectionAcrossNavigation",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                harness.StartCollection();
-                                // TODO Use navigation for projection when supported (#325)
-                                var result = context.Orders.Join(
-                                    context.Customers,
-                                    o => o.CustomerId,
-                                    c => c.CustomerId,
-                                    (o, c) => new { CustomerName = c.Name, OrderDate = o.Date })
-                                    .ToList();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                collector.StartCollection();
+                // TODO Use navigation for projection when supported (#325)
+                var result = context.Orders.Join(
+                context.Customers,
+                o => o.CustomerId,
+                c => c.CustomerId,
+                (o, c) => new { CustomerName = c.Name, OrderDate = o.Date })
+                .ToList();
 
-                                harness.StopCollection();
-                                Assert.Equal(2000, result.Count);
-                            }
-                        }
-                }.RunTest();
+                collector.StopCollection();
+                Assert.Equal(2000, result.Count);
+            }
         }
 
-        [Fact]
-        public void NoTracking()
+        [Benchmark(Iterations = 100, WarmupIterations = 5)]
+        public void NoTracking(MetricCollector collector)
         {
-            new TestDefinition
-                {
-                    TestName = "Query_Simple_NoTracking",
-                    IterationCount = 100,
-                    WarmupCount = 5,
-                    Setup = EnsureDatabaseSetup,
-                    Run = harness =>
-                        {
-                            using (var context = new OrdersContext(_connectionString))
-                            {
-                                harness.StartCollection();
-                                var result = context.Products.AsNoTracking().ToList();
-                                harness.StopCollection();
-                                Assert.Equal(1000, result.Count);
-                            }
-                        }
-                }.RunTest();
+            using (var context = new OrdersContext(_connectionString))
+            {
+                collector.StartCollection();
+                var result = context.Products.AsNoTracking().ToList();
+                collector.StopCollection();
+                Assert.Equal(1000, result.Count);
+            }
         }
 
         private static void EnsureDatabaseSetup()

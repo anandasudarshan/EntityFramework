@@ -64,6 +64,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="LocalConfig.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
